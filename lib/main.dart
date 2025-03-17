@@ -84,7 +84,9 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Receitas Deliciosas'),
+        title: Text('Receitas'),
+        centerTitle: true,
+        
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -100,12 +102,7 @@ class HomeScreen extends StatelessWidget {
             final receita = receitas[index];
             return GestureDetector(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RecipeDetailScreen(receita: receita),
-                  ),
-                );
+                _showRecipeBottomSheet(context, receita);
               },
               child: SizedBox(
                 width: 200, // Largura fixa do card
@@ -159,57 +156,72 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
-}
 
-class RecipeDetailScreen extends StatelessWidget {
-  final Map<String, String> receita;
-
-  RecipeDetailScreen({required this.receita});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(receita['nome']!),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: Image.asset(
-                receita['imagem']!,
-                width: double.infinity,
-                height: 250,
-                fit: BoxFit.cover,
+  void _showRecipeBottomSheet(BuildContext context, Map<String, String> receita) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Permite que o BottomSheet tenha um tamanho controlado
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Image.asset(
+                      receita['imagem']!,
+                      width: double.infinity,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    receita['nome']!,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  _buildTopic('Descrição', receita['descricao']!),
+                  _buildTopic('Ingredientes', receita['ingredientes']!),
+                  _buildTopic('Modo de Preparo', receita['modo_preparo']!),
+                ],
               ),
             ),
-            SizedBox(height: 16),
-            Text(
-              receita['nome']!,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTopic(String title, String content) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$title:',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
-            SizedBox(height: 16),
-            Text(
-              'Descrição: \n\n${receita['descricao']}',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Ingredientes: \n\n${receita['ingredientes']}',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Modo de Preparo: \n\n${receita['modo_preparo']}',
-              style: TextStyle(fontSize: 16),
-            ),
-          ],
-        ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            content,
+            style: TextStyle(fontSize: 16),
+          ),
+        ],
       ),
     );
   }
